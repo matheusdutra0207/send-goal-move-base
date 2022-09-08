@@ -22,7 +22,7 @@ def define_goal(x, y, theta_rad):
 def send_goal(x, y, theta_rad, client):
     goal = define_goal(x, y, theta_rad)
     client.send_goal(goal)
-    print('setting final position task to  x:{:.2f}, y:{:.2f}, theta: {:.2f}'.format(pose[0],pose[1],pose[2]))
+    print('setting final position task to  x:{:.2f}, y:{:.2f}, theta: {:.2f}'.format(x,y,theta_rad))
     client.wait_for_result()
 
 
@@ -40,7 +40,7 @@ if __name__== "__main__":
         client.wait_for_server()     
         send_goal(  x= pathRequest.destination_pose.position.x,
                     y = pathRequest.destination_pose.position.y,
-                    theta = 0, 
+                    theta_rad = 0, 
                     client = client)
         client.cancel_all_goals()
     
