@@ -1,0 +1,131 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-position-interpreter
+  namespace: default
+data:
+  mobi-pos-interpreter: |-
+    {
+    "broker_uri": "amqp://10.10.3.188:30000",
+    "area":{
+        "id": 0,
+        "name": "labsea"
+      }
+    }
+
+  dictionaries: |-
+    {
+        "place_0": {
+            "identification": {
+                "pt-BR": [
+                    "origem",
+                    "ponto de partida"
+                ],
+                "en-US": [
+                    "start",
+                    "origin"
+                ]
+            },
+            "x": 0.0,
+            "y": 0.0
+        },
+        "place_1": {
+            "identification": {
+                "pt-BR": [
+                    "saída",
+                    "porta",
+                    "saida"
+                ],
+                "en-US": [
+                    "door",
+                    "exit"
+                ]
+            },
+            "x": -2.5,
+            "y": -4.68
+        },
+        "place_2": {
+            "identification": {
+                "pt-BR": [
+                    "corredor"
+                ],
+                "en-US": [
+                    "hallway",
+                    "corridor"
+                ]
+            },
+            "x": -5.5,
+            "y": -6.2
+        },
+        "place_3": {
+            "identification": {
+                "pt-BR": [
+                    "armario",
+                    "armário",
+                    "escada",
+                    "ferramentas"
+                ],
+                "en-US": [
+                    "locker",
+                    "airmore",
+                    "locker",
+                    "tools"
+                ]
+            },
+            "x": -1.0,
+            "y": 2.5
+        },
+        "place_4": {
+            "identification": {
+                "pt-BR": [
+                    "tv",
+                    "quadro",
+                    "televisão"
+                ],
+                "en-US": [
+                    "tv",
+                    "balckboard"
+                ]
+            },
+            "x": 2.0,
+            "y": -3.4
+        }
+    }
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "mobilysa-position-interpreter"
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mobi-pos-interpreter
+    spec:
+      hostNetwork: true
+      containers:
+        - name: service
+          image: labviros/mobilysa-position-interpreter:0.0.1
+          command: ["python"]
+          args: ["service.py", "../etc/conf/options.json"]
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: options
+              mountPath: /opt/mobilysa/positioninterpreter/etc/conf/
+            - name: dictionaries-volume
+              mountPath: /opt/mobilysa/positioninterpreter/etc/dictionaries/             
+      volumes:
+        - name: options
+          configMap:
+            name: configmap-position-interpreter
+            items:
+              - key: mobi-pos-interpreter
+                path: options.json
+        - name: dictionaries-volume
+          configMap:
+            name: configmap-position-interpreter
+            items:              
+              - key: dictionaries
+                path: labsea.json                

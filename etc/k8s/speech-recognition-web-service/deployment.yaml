@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: is-speech-recognition-web-config
+  namespace: default
+data:
+  BROKER_URI: "amqp://rabbitmq.default:5672"
+  EXTERNAL_SERVICE_PORT: "30500"
+  RECOGNITION_LANGUAGE: "pt-BR"
+  MICROPHONE_ID: "0"
+
+---
+
+apiVersion: extensions/v1beta1 
+kind: Deployment
+metadata:
+  name: "is-speech-recognition-web"
+spec:
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: is-speech-recognition-web
+    spec:
+      containers:
+      - name: service 
+        image: labviros/is-speech-recognition-web:0.1.1
+        imagePullPolicy: Always
+        resources:
+          limits: 
+            cpu: "0.2"
+            memory: 128Mi
+        ports:
+        - name: http
+          containerPort: 5000
+        envFrom:
+        - configMapRef:
+            name: is-speech-recognition-web-config
+        env:
+        - name: HOST_IP_ADDRESS
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: is-speech-recognition-web
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: is-speech-recognition-web
+  ports:
+    - name: http
+      protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30500
