@@ -1,0 +1,5 @@
+{
+    "broker_uri": "amqp://10.10.3.188:30000",
+    "area_id":               0,
+    "microphone_id":         0
+}
