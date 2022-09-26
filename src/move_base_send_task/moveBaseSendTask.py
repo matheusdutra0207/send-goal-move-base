@@ -7,7 +7,7 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from actionlib_msgs.msg import GoalID
 
 
-class MoveBaseSendTasks():
+class ManageTasks():
 
     def __init__(self, area_id, microphone_id):
         self.position_interpreter_topic = f"PathPlanner.AreaID.{area_id}.GetPath"
@@ -16,7 +16,7 @@ class MoveBaseSendTasks():
     def move_base_send_task(self, message):     
         if message.topic == self.position_interpreter_topic:
             pathRequest = message.unpack(PathRequest)            
-            self.__movebase_send_goal(
+            self.__send_goal(
                 x = pathRequest.destination_pose.position.x,
                 y = pathRequest.destination_pose.position.y
             )      
@@ -25,10 +25,10 @@ class MoveBaseSendTasks():
             message.unpack(Phrase)
             phrase = message.unpack(Phrase)
             for word in phrase.content:
-                if word in ['pare', 'stop']:      
-                    self.__move_base_stop()
+                if word in ['pare', 'stop', 'para']:      
+                    self.__stop()
 
-    def __movebase_send_goal(self, x, y):
+    def __send_goal(self, x, y):
         client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
         rospy.loginfo("wait for move base server")
         client.wait_for_server()
@@ -41,7 +41,7 @@ class MoveBaseSendTasks():
         client.send_goal(goal)
         rospy.loginfo(f" send goal to x = {x} y = {y}")
 
-    def __move_base_stop(self):
+    def __stop(self):
         cancel_pub = rospy.Publisher("/move_base/cancel", actionlib.GoalID, queue_size=1)
         cancel_msg = GoalID()
         cancel_pub.publish(cancel_msg)

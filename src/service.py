@@ -13,19 +13,23 @@ from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from tf.transformations import quaternion_from_euler
 from actionlib_msgs.msg import GoalID
 
-from move_base_send_task.moveBaseSendTask import MoveBaseSendTasks
+from move_base_send_task.moveBaseSendTask import ManageTasks
 
 if __name__== "__main__":
-    area_id = 0
-    microphone_id = 0
+
+    config_file = sys.argv[1] if len(sys.argv) > 1 else '../etc/config/config.json'
+    config = json.load(open(config_file, 'r'))
+    broker_uri = config['broker_uri']
+    area_id = config['area_id']
+    microphone_id = config['microphone_id']
     position_interpreter_topic = f"PathPlanner.AreaID.{area_id}.GetPath"
     speech_recognition_topic = f"SpeechRecognition.{microphone_id}.Phrase"
-    channel = Channel("amqp://10.10.3.188:30000")
+    channel = Channel(broker_uri)
     subscription = Subscription(channel)
     subscription.subscribe(topic = position_interpreter_topic)
     subscription.subscribe(topic = speech_recognition_topic)
     rospy.init_node('movebase_send_goal_py')
-    move_base_send_tasks = MoveBaseSendTasks(
+    move_base_send_tasks = ManageTasks(
         area_id = area_id, 
         microphone_id = microphone_id)
 
