@@ -2,6 +2,8 @@
 # license removed for brevity
 
 import socket
+import sys
+import json
 
 from is_wire.core import Channel, Subscription
 from is_msgs.robot_pb2 import PathRequest
@@ -35,5 +37,5 @@ if __name__== "__main__":
 
     while True:
         message = channel.consume()
-        result = move_base_send_tasks.move_base_send_task(message)
+        move_base_send_tasks.move_base_send_task(message)
         
